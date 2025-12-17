@@ -22,8 +22,9 @@ Route::get('/dashboard', function () {
 
     $chartLabels = $industryData->pluck('industri');
     $chartData = $industryData->pluck('total');
+    $recentClients = InformasiKlien::latest()->limit(6)->get();
 
-    return view('dashboard', compact('totalClients', 'chartLabels', 'chartData'));
+    return view('dashboard', compact('totalClients', 'chartLabels', 'chartData', 'recentClients'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

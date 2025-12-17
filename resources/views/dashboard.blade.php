@@ -1,4 +1,12 @@
 <x-app-layout>
+    @php
+        $totalUsers = $totalUsers ?? null;
+        $totalClients = $totalClients ?? null;
+        $totalMedsos = $totalMedsos ?? null;
+        $engagement = $engagement ?? null;
+        $chartLabels = $chartLabels ?? [];
+        $chartData = $chartData ?? [];
+    @endphp
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
@@ -85,49 +93,72 @@
 
             <!-- Chart + Recent Activity -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-                <!-- Chart placeholder -->
-                <div class="lg:col-span-2 rounded-xl border border-gray-200/70 dark:border-gray-700/70 bg-white dark:bg-gray-800">
-                    <div class="p-5 border-b border-gray-100 dark:border-gray-700/60">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Tren Mingguan</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Placeholder grafik (bisa dihubungkan ke Chart.js nanti).</p>
-                    </div>
-                    <div class="p-6">
-                        <div class="p-6">
-                            <canvas id="clientsChart" class="w-full h-56 sm:h-72"></canvas>
+                <!-- Chart + Recent Clients -->
+                    <div class="lg:col-span-2 rounded-xl overflow-hidden shadow-sm border border-gray-200/70 dark:border-gray-700/70 bg-white dark:bg-gray-800">
+                        <div class="p-5 bg-gradient-to-r from-indigo-50 to-white dark:from-indigo-900/10 border-b border-gray-100 dark:border-gray-700/60">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Tren Klien Berdasarkan Industri</h3>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Distribusi klien per industri (update otomatis saat data baru ditambahkan).</p>
+                                </div>
+                                <div class="text-sm text-gray-600 dark:text-gray-300">Total Klien: <span class="font-semibold">{{ $totalClients ?? '0' }}</span></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 p-6">
+                            <div class="lg:col-span-2">
+                                <div class="w-full h-64 sm:h-80">
+                                    <canvas id="clientsChart" class="w-full h-full"></canvas>
+                                </div>
+                            </div>
+                            <div class="lg:col-span-1">
+                                <div class="rounded-md bg-gray-50 dark:bg-gray-900/40 p-3 h-full">
+                                    <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">Klien Terbaru</h4>
+                                    <ul role="list" class="mt-3 divide-y divide-gray-100 dark:divide-gray-700/60 max-h-56 overflow-auto">
+                                        @forelse($recentClients ?? [] as $rc)
+                                            <li class="py-2 flex items-start justify-between">
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $rc->nama }}</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $rc->industri }} · {{ $rc->kota }}</p>
+                                                </div>
+                                                <div class="text-xs text-gray-400">{{ $rc->created_at->diffForHumans() }}</div>
+                                            </li>
+                                        @empty
+                                            <li class="py-2 text-sm text-gray-500">Belum ada klien.</li>
+                                        @endforelse
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Recent Activity -->
-                <div class="rounded-xl border border-gray-200/70 dark:border-gray-700/70 bg-white dark:bg-gray-800 overflow-hidden">
-                    <div class="p-5 border-b border-gray-100 dark:border-gray-700/60">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Aktivitas Terbaru</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Update terakhir dari sistem.</p>
+                <!-- Recent Activity / Shortcuts -->
+                    <div class="rounded-xl overflow-hidden shadow-sm border border-gray-200/70 dark:border-gray-700/70 bg-white dark:bg-gray-800">
+                        <div class="p-5 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Aktivitas & Shortcuts</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Ringkasan aktivitas dan tindakan cepat.</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('admin.informasi-klien.create') }}" class="px-3 py-1.5 rounded-md bg-blue-600 text-white text-sm">Tambah Klien</a>
+                                <a href="#" class="px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-700/60 text-sm">Lihat Semua</a>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <ul role="list" class="divide-y divide-gray-100 dark:divide-gray-700/60">
+                                @forelse($recentClients ?? [] as $rc2)
+                                    <li class="py-3 flex items-start justify-between">
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $rc2->nama }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $rc2->industri }} · {{ $rc2->kota }}</p>
+                                        </div>
+                                        <div class="text-xs text-gray-400">{{ $rc2->created_at->diffForHumans() }}</div>
+                                    </li>
+                                @empty
+                                    <li class="py-3 text-sm text-gray-500">Belum ada aktivitas.</li>
+                                @endforelse
+                            </ul>
+                        </div>
                     </div>
-                    <ul role="list" class="divide-y divide-gray-100 dark:divide-gray-700/60">
-                        <li class="p-4 flex items-start gap-3">
-                            <span class="mt-0.5 inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
-                            <div>
-                                <p class="text-sm text-gray-900 dark:text-gray-100">Klien baru ditambahkan: <span class="font-medium">PT Maju Jaya</span></p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">2 jam yang lalu</p>
-                            </div>
-                        </li>
-                        <li class="p-4 flex items-start gap-3">
-                            <span class="mt-0.5 inline-flex h-2.5 w-2.5 rounded-full bg-indigo-500"></span>
-                            <div>
-                                <p class="text-sm text-gray-900 dark:text-gray-100">Akun medsos diverifikasi</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Kemarin</p>
-                            </div>
-                        </li>
-                        <li class="p-4 flex items-start gap-3">
-                            <span class="mt-0.5 inline-flex h-2.5 w-2.5 rounded-full bg-amber-500"></span>
-                            <div>
-                                <p class="text-sm text-gray-900 dark:text-gray-100">Pembaruan profil pengguna</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">3 hari yang lalu</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
             </div>
 
             <!-- Table -->
@@ -193,6 +224,15 @@
 
             const labels = @json($chartLabels ?? []);
             const data = @json($chartData ?? []);
+
+            console.log('clients chart labels:', labels);
+            console.log('clients chart data:', data);
+
+            if (!labels || labels.length === 0) {
+                const parent = ctx.parentElement || ctx;
+                parent.innerHTML = '<div class="text-sm text-gray-500">Belum ada data klien untuk ditampilkan.</div>';
+                return;
+            }
 
             new Chart(ctx.getContext('2d'), {
                 type: 'bar',
