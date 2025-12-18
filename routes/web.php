@@ -24,6 +24,9 @@ Route::get('/dashboard', function () {
     $chartData = $industryData->pluck('total');
     $recentClients = InformasiKlien::latest()->limit(6)->get();
 
+    // Debug: check if data is passed
+    // dd($chartLabels->toArray(), $chartData->toArray());
+
     return view('dashboard', compact('totalClients', 'chartLabels', 'chartData', 'recentClients'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 

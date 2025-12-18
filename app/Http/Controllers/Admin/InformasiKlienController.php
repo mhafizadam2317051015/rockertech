@@ -56,7 +56,8 @@ class InformasiKlienController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $klien = InformasiKlien::findOrFail($id);
+        return view('admin.informasi-klien.edit', compact('klien'));
     }
 
     /**
@@ -64,7 +65,18 @@ class InformasiKlienController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'nomorWA' => 'required|string|max:50',
+            'jabatan' => 'required|string|max:255',
+            'industri' => 'required|string|max:255',
+            'kota' => 'required|string|max:255',
+        ]);
+
+        $klien = InformasiKlien::findOrFail($id);
+        $klien->update($validated);
+
+        return redirect()->route('admin.informasi-klien.index')->with('success', 'Klien berhasil diperbarui.');
     }
 
     /**
@@ -72,6 +84,9 @@ class InformasiKlienController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $klien = InformasiKlien::findOrFail($id);
+        $klien->delete();
+
+        return redirect()->route('admin.informasi-klien.index')->with('success', 'Klien berhasil dihapus.');
     }
 }
